@@ -26,12 +26,15 @@ public class Drivetrain extends Subsystem {
     private Encoder encoderBL; 
     private Encoder encoderFL; 
     PIDController motorController;
-
+    private Encoder swerveFrontRight;
 	Solenoid LightSol;
 	public static DoubleSolenoid FL,FR,BL,BR; 
     
     public Drivetrain()
     {
+    	//encoder for the angle of the swerve motor
+    	swerveFrontRight = new Encoder(4, 5, false, Encoder.EncodingType.k4X);
+    	
     	encoderFR = new Encoder(RobotMap.DIOencoderFRa, RobotMap.DIOencoderFRb, false, Encoder.EncodingType.k4X);
     	encoderBR = new Encoder(RobotMap.DIOencoderBRa, RobotMap.DIOencoderBRb, false, Encoder.EncodingType.k4X);
     	encoderBL = new Encoder(RobotMap.DIOencoderBLa, RobotMap.DIOencoderBLb, false, Encoder.EncodingType.k4X);
@@ -196,36 +199,67 @@ public class Drivetrain extends Subsystem {
     
     public void swerveDrive(Joystick stick)
     {
-    	double rotate = stick.getRawAxis(2);
+    	//these three commands get input from the joysticks
+    	double rotate = stick.getRawAxis(2);  	
     	double strafe = stick.getRawAxis(1);
     	double forward = stick.getRawAxis(0);
     	
+    	//gets the angle that the encoder is currently on
     	double theta = getFrontRightAngle();
     	double temp = forward * Math.cos(theta) + strafe*Math.sin(theta);
     	strafe = -forward * Math.sin(theta) + strafe * Math.cos(theta);
     	forward = temp;
     	
+    	//the ratio of the base of the robot
     	double length = 1;
     	double width = 1;
     	double radius = Math.sqrt(length * length + width * width);
     	
-    	double A = strafe - rotate * length / radius;
-    	double B = strafe + rotate * length / radius;
-    	double C = forward - rotate * length / radius;
-    	double D = forward + rotate * length / radius;
+    	//
+    	double A = strafe - (rotate * (length / radius));
+    	double B = strafe + (rotate * (length / radius));
+    	double C = forward - (rotate * (length / radius));
+    	double D = forward + (rotate * (length / radius));
     	
+    	//calculating the wheel speed
     	double ws1 = Math.sqrt(B*B + C*C);
     	double ws2 = Math.sqrt(B*B + D*D);
     	double ws3 = Math.sqrt(A*A + D*D);
     	double ws4 = Math.sqrt(A*A + C*C);
+    
+    	//calculating the angles of the wheels in degress
+    	double wa1 = Math.atan(B/C) * 180/Math.PI;
+    	double wa2 = Math.atan(B/D) * 180/Math.PI;
+    	double wa3 = Math.atan(A/D) * 180/Math.PI;
+    	double wa4 = Math.atan(A/C) * 180/Math.PI;
     	
-    	double wa1 = Math.atan(	);
+    	double max = ws1;
+    	
+    	if(ws2 > max)
+    		max=ws2;
+    	if(ws3 > max)
+    		max=ws3;
+    	if(ws4 > max)
+    		max=ws4;
+    	
+    	if(max>1) {
+    		ws1/=max;
+    		ws2/=max;
+    		ws3/=max;
+    		ws4/=max;
+    	}
+    	
+    	rightf_motor.set(ws1);
+    	leftf_motor.set(ws2);
+    	rightb_motor.set(ws3);
+    	leftb_motor.set(ws4);
+    	
     }
     
-    Encoder frontright= new Encoder(4, 5, false, Encoder.EncodingType.k4X);
+    
     public double getFrontRightAngle()
     {
-    	double ticks = frontright.get() % 1024;
+    	double ticks = swerveFrontRight.get() % 1024;
     	double ticksPerRotation = 1024;
     	return ticks / ticksPerRotation * 360;
     }
