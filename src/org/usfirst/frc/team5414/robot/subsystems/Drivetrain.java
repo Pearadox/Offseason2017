@@ -33,17 +33,17 @@ public class Drivetrain extends Subsystem {
     public Drivetrain()
     {
     	//encoder for the angle of the swerve motor
-    	swerveFrontRight = new Encoder(4, 5, false, Encoder.EncodingType.k4X);
+    	swerveFrontRight = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
     	
-    	encoderFR = new Encoder(RobotMap.DIOencoderFRa, RobotMap.DIOencoderFRb, false, Encoder.EncodingType.k4X);
-    	encoderBR = new Encoder(RobotMap.DIOencoderBRa, RobotMap.DIOencoderBRb, false, Encoder.EncodingType.k4X);
-    	encoderBL = new Encoder(RobotMap.DIOencoderBLa, RobotMap.DIOencoderBLb, false, Encoder.EncodingType.k4X);
-    	encoderFL = new Encoder(RobotMap.DIOencoderFLa, RobotMap.DIOencoderFLb, false, Encoder.EncodingType.k4X);
+//    	encoderFR = new Encoder(RobotMap.DIOencoderFRa, RobotMap.DIOencoderFRb, false, Encoder.EncodingType.k4X);
+//    	encoderBR = new Encoder(RobotMap.DIOencoderBRa, RobotMap.DIOencoderBRb, false, Encoder.EncodingType.k4X);
+//    	encoderBL = new Encoder(RobotMap.DIOencoderBLa, RobotMap.DIOencoderBLb, false, Encoder.EncodingType.k4X);
+//    	encoderFL = new Encoder(RobotMap.DIOencoderFLa, RobotMap.DIOencoderFLb, false, Encoder.EncodingType.k4X);
     	
-    	encoderFR.reset();
-    	encoderBR.reset();
-    	encoderBL.reset();
-    	encoderFL.reset();
+//    	encoderFR.reset();
+//    	encoderBR.reset();
+//    	encoderBL.reset();
+//    	encoderFL.reset();
     	
     	FL = new DoubleSolenoid(RobotMap.SolenoidFLa , RobotMap.SolenoidFLb );
     	FR = new DoubleSolenoid(RobotMap.SolenoidFRa,RobotMap.SolenoidFRb);
@@ -70,18 +70,20 @@ public class Drivetrain extends Subsystem {
     
     public double getSpeed()
     {
-//    	encoderFR.setDistancePerPulse(RobotMap.LengthPerTick);
-    	return (encoderFR.getRate() + encoderFL.getRate() + encoderBR.getRate() + encoderBL.getRate()) / 4. * RobotMap.LengthPerTick; 
+    	return 0;
+//    	return (encoderFR.getRate() + encoderFL.getRate() + encoderBR.getRate() + encoderBL.getRate()) / 4. * RobotMap.LengthPerTick; 
     }
     
     public int getEncoderBL()
     {
-    	return encoderBL.get();
+//    	return encoderBL.get();
+    	return 0;
     }
     
     public int getEncoderBR()
     {
-    	return -encoderBR.get();
+//    	return -encoderBR.get();
+    	return 0;
     }
     
     public void zeroEncoderBL()
@@ -248,6 +250,7 @@ public class Drivetrain extends Subsystem {
     		ws3/=max;
     		ws4/=max;
     	}
+    	SmartDashboard.putNumber("Encoder Swerve", swerveFrontRight.);
     	
     	rightf_motor.set(ws1);
     	leftf_motor.set(ws2);
@@ -372,10 +375,10 @@ public class Drivetrain extends Subsystem {
 				} else if (countIterations > 5) {
 					Rotate = (desiredHeading - Robot.gyro.getYaw()) / 40.0;
 				}
-				SmartDashboard.putNumber("EncoderBR", encoderBR.get());
-		    	SmartDashboard.putNumber("EncoderFR", encoderFR.get());
-		    	SmartDashboard.putNumber("EncoderFL", encoderFL.get());
-		    	SmartDashboard.putNumber("EncoderBL", encoderBL.get());
+//				SmartDashboard.putNumber("EncoderBR", encoderBR.get());
+//		    	SmartDashboard.putNumber("EncoderFR", encoderFR.get());
+//		    	SmartDashboard.putNumber("EncoderFL", encoderFL.get());
+//		    	SmartDashboard.putNumber("EncoderBL", encoderBL.get());
 				drive.mecanumDrive_Cartesian(moveX, moveY, Rotate,0);
     }
     
