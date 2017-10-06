@@ -6,7 +6,6 @@
 	<classpathentry exported="true" kind="var" path="opencv" sourcepath="opencv.sources"/>
 	<classpathentry exported="true" kind="var" path="cscore" sourcepath="cscore.sources"/>
 	<classpathentry kind="var" path="navx-mxp"/>
-	<classpathentry kind="var" path="USERLIBS_DIR/navx_frc.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files (x86)/Autodesk/Synthesis/SynthesisDrive/sdk/libraryResources/SynthesisLibs.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Allen/wpilib/java/current/lib/cscore.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Allen/wpilib/java/current/lib/cscore-sources.jar"/>
@@ -19,7 +18,6 @@
 	<classpathentry kind="lib" path="C:/Users/Allen/wpilib/user/java/lib/navx_frc.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Pearadox1/wpilib/user/java/lib/navx_frc.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Pearadox1/wpilib/user/java/lib/TalonSRXLibJava.jar"/>
-	<classpathentry kind="var" path="USERLIBS_DIR/CTRLib.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

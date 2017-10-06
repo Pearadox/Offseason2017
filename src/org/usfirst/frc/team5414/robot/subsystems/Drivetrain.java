@@ -4,6 +4,7 @@ import org.usfirst.frc.team5414.robot.Robot;
 import org.usfirst.frc.team5414.robot.RobotMap;
 import org.usfirst.frc.team5414.robot.commands.DrivewithJoystick;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
@@ -26,14 +27,14 @@ public class Drivetrain extends Subsystem {
     private Encoder encoderBL; 
     private Encoder encoderFL; 
     PIDController motorController;
-    private Encoder swerveFrontRight;
+    private AnalogInput swerveFR;
 	Solenoid LightSol;
 	public static DoubleSolenoid FL,FR,BL,BR; 
     
     public Drivetrain()
     {
     	//encoder for the angle of the swerve motor
-    	swerveFrontRight = new Encoder(5, 6, false, Encoder.EncodingType.k4X);
+    	swerveFR = new AnalogInput(0);
     	
 //    	encoderFR = new Encoder(RobotMap.DIOencoderFRa, RobotMap.DIOencoderFRb, false, Encoder.EncodingType.k4X);
 //    	encoderBR = new Encoder(RobotMap.DIOencoderBRa, RobotMap.DIOencoderBRb, false, Encoder.EncodingType.k4X);
@@ -207,7 +208,7 @@ public class Drivetrain extends Subsystem {
     	double forward = stick.getRawAxis(0);
     	
     	//gets the angle that the encoder is currently on
-    	double theta = getFrontRightAngle();
+    	double theta = getSwerveFRAngle();
     	double temp = forward * Math.cos(theta) + strafe*Math.sin(theta);
     	strafe = -forward * Math.sin(theta) + strafe * Math.cos(theta);
     	forward = temp;
@@ -224,10 +225,10 @@ public class Drivetrain extends Subsystem {
     	double D = forward + (rotate * (length / radius));
     	
     	//calculating the wheel speed
-    	double ws1 = Math.sqrt(B*B + C*C);
-    	double ws2 = Math.sqrt(B*B + D*D);
-    	double ws3 = Math.sqrt(A*A + D*D);
-    	double ws4 = Math.sqrt(A*A + C*C);
+    	double ws1 = Math.sqrt(B*B + C*C); //FR
+    	double ws2 = Math.sqrt(B*B + D*D); //FL
+    	double ws3 = Math.sqrt(A*A + D*D); //BR
+    	double ws4 = Math.sqrt(A*A + C*C); //BL
     
     	//calculating the angles of the wheels in degress
     	double wa1 = Math.atan(B/C) * 180/Math.PI;
@@ -250,21 +251,24 @@ public class Drivetrain extends Subsystem {
     		ws3/=max;
     		ws4/=max;
     	}
-    	SmartDashboard.putNumber("Encoder Swerve", swerveFrontRight.);
+    	SmartDashboard.putNumber("Encoder Swerve", getSwerveFRAngle());
     	
     	rightf_motor.set(ws1);
     	leftf_motor.set(ws2);
     	rightb_motor.set(ws3);
     	leftb_motor.set(ws4);
     	
+    	setSwerveFRAngle(wa1);
     }
     
-    
-    public double getFrontRightAngle()
+    public void setSwerveFRAngle(double angle)
     {
-    	double ticks = swerveFrontRight.get() % 1024;
-    	double ticksPerRotation = 1024;
-    	return ticks / ticksPerRotation * 360;
+    	
+    }
+
+	public double getSwerveFRAngle()
+    {
+    	return swerveFR.getVoltage() * 180. / 2.5;
     }
     
     public void mecanumDrive(Joystick stick) {
