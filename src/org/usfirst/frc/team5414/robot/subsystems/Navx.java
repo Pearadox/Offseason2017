@@ -6,20 +6,20 @@ import org.usfirst.frc.team5414.robot.RobotMap;
 
 //import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
+//import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.PIDSourceType;
-import edu.wpi.first.wpilibj.SPI;
+//import edu.wpi.first.wpilibj.PIDSourceType;
+//import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  *
  */
-public class Navx extends Subsystem implements PIDSource{
+public class Navx extends Subsystem{
 
 //	AHRS ahrs = new AHRS(SPI.Port.kMXP); //navx
-	AnalogGyro gy = new AnalogGyro(RobotMap.GyroPort);
+//	AnalogGyro gy = new AnalogGyro(RobotMap.GyroPort);
 	
 	public static double yawOffset;
 	
@@ -28,9 +28,9 @@ public class Navx extends Subsystem implements PIDSource{
     
     public void initialize()
     {
-    	gy.initGyro();
-    	gy.setSensitivity(.007);
-    	gy.calibrate();
+//    	gy.initGyro();
+//    	gy.setSensitivity(.007);
+//    	gy.calibrate();
     	zeroYaw();
     	yawOffset = 0;
     }
@@ -47,7 +47,8 @@ public class Navx extends Subsystem implements PIDSource{
     
     public double getYaw()
     {
-    	return gy.getAngle();			//getting the angle of the gyro
+//    	return gy.getAngle();			//getting the angle of the gyro
+    	return 0;
     }
     
     public void zeroYaw()
@@ -58,17 +59,17 @@ public class Navx extends Subsystem implements PIDSource{
     public void reset()
     {
     	yawOffset += getYaw() - yawOffset;
-    	gy.reset();					//resetting the gyro
+//    	gy.reset();					//resetting the gyro
     }
 
-    public void setPIDSourceType(PIDSourceType pidSource) {
+//    public void setPIDSourceType(PIDSourceType pidSource) {
 		
-	}
+//	}
 
-	public PIDSourceType getPIDSourceType() {
+//	public PIDSourceType getPIDSourceType() {
 		
-		return PIDSourceType.kRate;		//returns the source type of the PID loop
-	}
+//		return PIDSourceType.kRate;		//returns the source type of the PID loop
+//	}
 	
 	int times = 0;
 	
