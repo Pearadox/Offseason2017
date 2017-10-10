@@ -4,10 +4,13 @@ package org.usfirst.frc.team5414.robot.subsystems;
 
 import org.usfirst.frc.team5414.robot.RobotMap;
 
+import com.kauailabs.navx.frc.AHRS;
+
 //import com.kauailabs.navx.frc.AHRS;
 
 //import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.SPI;
 //import edu.wpi.first.wpilibj.PIDSourceType;
 //import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -18,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Navx extends Subsystem{
 
-//	AHRS ahrs = new AHRS(SPI.Port.kMXP); //navx
+	AHRS ahrs = new AHRS(SPI.Port.kMXP); //navx
 //	AnalogGyro gy = new AnalogGyro(RobotMap.GyroPort);
 	
 	public static double yawOffset;
@@ -48,7 +51,7 @@ public class Navx extends Subsystem{
     public double getYaw()
     {
 //    	return gy.getAngle();			//getting the angle of the gyro
-    	return 0;
+    	return ahrs.getYaw();
     }
     
     public void zeroYaw()

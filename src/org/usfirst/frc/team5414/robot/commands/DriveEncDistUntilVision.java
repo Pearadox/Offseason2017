@@ -45,7 +45,7 @@ public class DriveEncDistUntilVision extends Command implements PIDOutput{
     	
     	originalAngle = Robot.gyro.getYaw();
     	initDistance = Robot.drivetrain.getEncoderBL();
-    	twistpid = new PIDController(kP, kI, kD, Robot.gyro, this, .01);
+//    	twistpid = new PIDController(kP, kI, kD, Robot.gyro, this, .01);
     	twistpid.setInputRange(-360, 360);
     	twistpid.setOutputRange(-1.0, 1.0);
     	twistpid.setContinuous(true);

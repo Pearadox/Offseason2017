@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -131,10 +132,10 @@ public class Drivetrain extends Subsystem {
     	ax1 *= ax1; ax2 *= ax2; //scaling the output of the joystick to fine tune the end result
     	if(ax1n) ax1 *= -1;
     	if(ax2n) ax2 *= -1;
-    	SmartDashboard.putNumber("EncoderBR", getEncoderBR());
-    	SmartDashboard.putNumber("EncoderFR", -encoderFR.get());
-    	SmartDashboard.putNumber("EncoderFL", getEncoderBL());
-    	SmartDashboard.putNumber("EncoderBL", -encoderBL.get());
+//    	SmartDashboard.putNumber("EncoderBR", getEncoderBR());
+//    	SmartDashboard.putNumber("EncoderFR", -encoderFR.get());
+//    	SmartDashboard.putNumber("EncoderFL", getEncoderBL());
+//    	SmartDashboard.putNumber("EncoderBL", -encoderBL.get());
     	drive.arcadeDrive(-ax1,-ax2);
     }
     
@@ -208,21 +209,22 @@ public class Drivetrain extends Subsystem {
     	double forward = stick.getRawAxis(0);
     	
     	//gets the angle that the encoder is currently on
-    	double theta = getSwerveFRAngle();
+//    	double theta = getSwerveFRAngle();
+    	double theta = Robot.gyro.getYaw();
     	double temp = forward * Math.cos(theta) + strafe*Math.sin(theta);
     	strafe = -forward * Math.sin(theta) + strafe * Math.cos(theta);
     	forward = temp;
     	
     	//the ratio of the base of the robot
-    	double length = 1;
-    	double width = 1;
+    	double length = 8;
+    	double width = 7;
     	double radius = Math.sqrt(length * length + width * width);
     	
     	//
     	double A = strafe - (rotate * (length / radius));
     	double B = strafe + (rotate * (length / radius));
-    	double C = forward - (rotate * (length / radius));
-    	double D = forward + (rotate * (length / radius));
+    	double C = forward - (rotate * (width / radius));
+    	double D = forward + (rotate * (width / radius));
     	
     	//calculating the wheel speed
     	double ws1 = Math.sqrt(B*B + C*C); //FR
@@ -231,10 +233,10 @@ public class Drivetrain extends Subsystem {
     	double ws4 = Math.sqrt(A*A + C*C); //BL
     
     	//calculating the angles of the wheels in degress
-    	double wa1 = Math.atan(B/C) * 180/Math.PI;
-    	double wa2 = Math.atan(B/D) * 180/Math.PI;
-    	double wa3 = Math.atan(A/D) * 180/Math.PI;
-    	double wa4 = Math.atan(A/C) * 180/Math.PI;
+    	double wa1 = Math.atan2(B, C) * 180/Math.PI;
+    	double wa2 = Math.atan2(B, D) * 180/Math.PI;
+    	double wa3 = Math.atan2(A, D) * 180/Math.PI;
+    	double wa4 = Math.atan2(A, C) * 180/Math.PI;
     	
     	double max = ws1;
     	
@@ -253,22 +255,71 @@ public class Drivetrain extends Subsystem {
     	}
     	SmartDashboard.putNumber("Encoder Swerve", getSwerveFRAngle());
     	
-    	rightf_motor.set(ws1);
-    	leftf_motor.set(ws2);
-    	rightb_motor.set(ws3);
+    	DriverStation.reportWarning(ws1+"", true);
+//    	rightf_motor.set(ws1);
+//    	leftf_motor.set(ws2);
+//    	rightb_motor.set(ws3);
     	leftb_motor.set(ws4);
-    	
     	setSwerveFRAngle(wa1);
     }
     
+    double lastTime = Timer.getFPGATimestamp();
+    double lastError = 0;
+    
     public void setSwerveFRAngle(double angle)
     {
-    	
+    	double currentTime = Timer.getFPGATimestamp();
+    	double kP = .003;
+    	double kI = 0;
+    	double kD = 0;
+    	angle += 3600;
+    	angle %= 360;
+    	double currentAngle = getSwerveFRAngle();
+    	SmartDashboard.putNumber("Current Angle", currentAngle);
+    	SmartDashboard.putNumber("Desired Angle", angle);
+    	if(currentAngle-angle > 0)
+    	{
+    		if(currentAngle-angle >= 180)
+    		{
+    			double error = currentAngle - angle - 180;
+    			rightb_motor.set(-kP * error + (error - lastError) / (currentTime - lastTime));
+    			lastError = error;
+    			lastTime = currentTime;
+    		}
+    		else
+    		{
+    			double error = currentAngle - angle;
+    			rightb_motor.set(kP * error + (error - lastError) / (currentTime - lastTime));
+    			lastError = error;
+    			lastTime = currentTime;
+    		}
+    	}
+    	else
+    	{
+    		if(angle-currentAngle >= 180)
+    		{
+    			double error = angle - currentAngle - 180;
+    			rightb_motor.set(-kP * error + (error - lastError) / (currentTime - lastTime));
+    			lastError = error;
+    			lastTime = currentTime;
+    		}
+    		else
+    		{
+    			double error = angle - currentAngle;
+    			rightb_motor.set(kP * error + (error - lastError) / (currentTime - lastTime));
+    			lastError = error;
+    			lastTime = currentTime;
+    		}
+    	}
     }
 
 	public double getSwerveFRAngle()
     {
-    	return swerveFR.getVoltage() * 180. / 2.5;
+		double angle = swerveFR.getVoltage() * 180. / 2.5 - 106;
+		angle += 360;
+		angle %= 360;
+		SmartDashboard.putNumber("Encoder Swerve", angle);
+    	return angle;
     }
     
     public void mecanumDrive(Joystick stick) {
