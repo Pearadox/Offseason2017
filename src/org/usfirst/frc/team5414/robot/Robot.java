@@ -45,6 +45,7 @@ import org.usfirst.frc.team5414.robot.commands.RevDBGroup;
 import org.usfirst.frc.team5414.robot.subsystems.Climber;
 import org.usfirst.frc.team5414.robot.subsystems.Drivetrain;
 import org.usfirst.frc.team5414.robot.subsystems.Electrical;
+import org.usfirst.frc.team5414.robot.subsystems.FREncoder;
 import org.usfirst.frc.team5414.robot.subsystems.GearArm;
 import org.usfirst.frc.team5414.robot.subsystems.GearCollector;
 
@@ -71,6 +72,7 @@ public class Robot extends IterativeRobot {
 	public static Shooter shooter;
 	public static boolean isAutonomous;
 	public static Minimap map;
+	public static FREncoder FRencoder;
 	Command autonomousCommand;
 //	SendableChooser<CommandGroup> AutoChooser;
 	static boolean currentButtonState;
@@ -95,7 +97,8 @@ public class Robot extends IterativeRobot {
 //			CameraServer.getInstance().startAutomaticCapture(cam1);
 //			CameraServer.getInstance().startAutomaticCapture(0);
 		} catch(Exception e){}
-		//Should probably remove the digiboard as we are unlikely to use it. 
+		//Should probably remove the digiboard as we are unlikely to use it.
+		FRencoder = new FREncoder();
 		revdigitboard = new REVDigitBoard();
 		table = NetworkTable.getTable("GRIP/myContoursReport");
 		geararm = new GearArm();

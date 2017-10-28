@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedController;
@@ -18,7 +19,7 @@ import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Drivetrain extends Subsystem {
+public class Drivetrain extends Subsystem implements PIDOutput {
 
 	private SpeedController rightf_motor, rightb_motor, leftf_motor, leftb_motor;
 //	private CANTalon leftf_motor, leftb_motor;
@@ -28,14 +29,14 @@ public class Drivetrain extends Subsystem {
     private Encoder encoderBL; 
     private Encoder encoderFL; 
     PIDController motorController;
-    private AnalogInput swerveFR;
 	Solenoid LightSol;
-	public static DoubleSolenoid FL,FR,BL,BR; 
+	double FROutput = 0;
+	public static DoubleSolenoid FL,FR,BL,BR;
+    PIDController pid;
     
     public Drivetrain()
     {
     	//encoder for the angle of the swerve motor
-    	swerveFR = new AnalogInput(0);
     	
 //    	encoderFR = new Encoder(RobotMap.DIOencoderFRa, RobotMap.DIOencoderFRb, false, Encoder.EncodingType.k4X);
 //    	encoderBR = new Encoder(RobotMap.DIOencoderBRa, RobotMap.DIOencoderBRb, false, Encoder.EncodingType.k4X);
@@ -66,7 +67,12 @@ public class Drivetrain extends Subsystem {
 		rightf_motor.setInverted(Boolean.TRUE);
 		rightb_motor.setInverted(Boolean.TRUE);
 		drive = new RobotDrive(leftf_motor, leftb_motor, rightf_motor, rightb_motor);
-		
+	
+		pid = new PIDController(1000, 0 , 0, Robot.FRencoder, rightb_motor);
+//        pid.setOutputRange(-1, 1);
+//        pid.setInputRange(-.5, .5);
+        pid.enable();
+        
 //		LightSol = new Solenoid(RobotMap.LightSolenoid);
     }
     
@@ -209,8 +215,9 @@ public class Drivetrain extends Subsystem {
     	double forward = stick.getRawAxis(0);
     	
     	//gets the angle that the encoder is currently on
+    	double theta = 0; //CHANGE THIS!!!!!!!!!!!!!!!!!!!!!!!
 //    	double theta = getSwerveFRAngle();
-    	double theta = Robot.gyro.getYaw();
+//    	double theta = Robot.gyro.getYaw();
     	double temp = forward * Math.cos(theta) + strafe*Math.sin(theta);
     	strafe = -forward * Math.sin(theta) + strafe * Math.cos(theta);
     	forward = temp;
@@ -263,8 +270,10 @@ public class Drivetrain extends Subsystem {
     	setSwerveFRAngle(wa1);
     }
     
-    double lastTime = Timer.getFPGATimestamp();
-    double lastError = 0;
+    double kP = .2;
+    double kD = .01;
+    double lastError = -1;
+    double lastTime = -1;
     
     public void setSwerveFRAngle(double angle)
     {
@@ -296,30 +305,24 @@ public class Drivetrain extends Subsystem {
     	}
     	else
     	{
-    		if(angle-currentAngle >= 180)
+    		double clockwise = getSwerveFRAngle() - angle;
+    		double counterclockwise = 360 - getSwerveFRAngle() + angle;
+    		if(clockwise > counterclockwise)
     		{
-    			double error = angle - currentAngle - 180;
-    			rightb_motor.set(-kP * error + (error - lastError) / (currentTime - lastTime));
-    			lastError = error;
-    			lastTime = currentTime;
+    			rightb_motor.set(1 * kP + kD * (lastError - currentError) / (currentTime-lastTime));
     		}
     		else
     		{
-    			double error = angle - currentAngle;
-    			rightb_motor.set(kP * error + (error - lastError) / (currentTime - lastTime));
-    			lastError = error;
-    			lastTime = currentTime;
+    			rightb_motor.set(-1 * kP - kD * (lastError - currentError) / (currentTime-lastTime));
     		}
     	}
+    	lastTime = currentTime;
+    	lastError = currentError;
     }
 
 	public double getSwerveFRAngle()
     {
-		double angle = swerveFR.getVoltage() * 180. / 2.5 - 106;
-		angle += 360;
-		angle %= 360;
-		SmartDashboard.putNumber("Encoder Swerve", angle);
-    	return angle;
+		return Robot.FRencoder.getAngle();
     }
     
     public void mecanumDrive(Joystick stick) {
@@ -375,7 +378,7 @@ public class Drivetrain extends Subsystem {
     	if(stick.getPOV() == StrafeRight){				//Checks POV direction of joystick. Sets movement values if true
     		moveX = moveSpeedPOV;
     		moveY = 0.0;
-    		Rotate = 0.0;	
+    		Rotate = 0.0;
     	}
     	else if(stick.getPOV() == StrafeLeft){
     		moveX = -moveSpeedPOV;
@@ -446,4 +449,10 @@ public class Drivetrain extends Subsystem {
     {
     	drive.mecanumDrive_Cartesian(strafeSpeed, straightSpeed, 0, yaw);
     }
+
+	@Override
+	public void pidWrite(double output) {
+		
+		double FROutput = output;
+	}
 }
